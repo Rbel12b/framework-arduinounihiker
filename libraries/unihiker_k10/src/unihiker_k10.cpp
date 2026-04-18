@@ -338,8 +338,9 @@ static void cameDisPlayTask(void *xQueueCam)
         img_camera.header.always_zero = 0;
         img_camera.header.w = frame->width;
         img_camera.header.h = frame->height;
-        img_camera.data_size = 153600 / LV_IMG_PX_SIZE_ALPHA_BYTE;
+        img_camera.data_size = frame->len;
         img_camera.data = (const uint8_t*)frame->buf;//(const uint8_t*)camBuf;
+        // log_e("Camera data format: %i, res: %ix%i", frame->format, frame->width, frame->height);
         lv_img_set_src(_cam,&img_camera);
         lv_task_handler();
       }
@@ -414,10 +415,12 @@ void UNIHIKER_K10::initBgCamerImage(void)
   if(!xQueueCamer){
     xQueueCamer = xQueueCreate(2, sizeof(camera_fb_t *));
     register_camera(PIXFORMAT_RGB565, FRAMESIZE_QVGA, 2, xQueueCamer);//FRAMESIZE_HVGA  FRAMESIZE_QVGA FRAMESIZE_240X240
+    // register_camera(PIXFORMAT_JPEG, FRAMESIZE_QVGA, 2, xQueueCamer);//FRAMESIZE_HVGA  FRAMESIZE_QVGA FRAMESIZE_240X240
     xTaskCreatePinnedToCore(&cameDisPlayTask, "cameDisPlayTask", 4 * 1024, (void*)xQueueCamer, 5, &cameraDisplayTaskHandle, 1);// Create a camera display task, task level 5 (general level) 
   }else{
-    register_camera(PIXFORMAT_RGB565, FRAMESIZE_QVGA, 2, xQueueCamer);//FRAMESIZE_HVGA  FRAMESIZE_QVGA FRAMESIZE_240X240
-    xTaskCreatePinnedToCore(&cameDisPlayTask, "cameDisPlayTask", 4 * 1024, (void*)xQueueAI, 5, &cameraDisplayTaskHandle, 1);
+    // register_camera(PIXFORMAT_RGB565, FRAMESIZE_QVGA, 2, xQueueCamer);//FRAMESIZE_HVGA  FRAMESIZE_QVGA FRAMESIZE_240X240
+    // register_camera(PIXFORMAT_JPEG, FRAMESIZE_QVGA, 2, xQueueCamer);//FRAMESIZE_HVGA  FRAMESIZE_QVGA FRAMESIZE_240X240
+    // xTaskCreatePinnedToCore(&cameDisPlayTask, "cameDisPlayTask", 4 * 1024, (void*)xQueueAI, 5, &cameraDisplayTaskHandle, 1);
   }
 }
 
@@ -673,7 +676,7 @@ void Canvas::canvasClear(void)
 {
   xSemaphoreTake(xLvglMutex, portMAX_DELAY);
   lv_canvas_fill_bg(_canvas,lv_color_make(0x00,0x00,0x00),LV_OPA_TRANSP);
-  lv_task_handler();
+  // lv_task_handler();
   xSemaphoreGive(xLvglMutex);
 }
 
@@ -1652,11 +1655,11 @@ bool UNIHIKER_K10::isGesture(Gesture gesture)
 void UNIHIKER_K10::canvasDrawCode(String code)
 {
   if(!qrCode){
-    if(!_cam){
+    // if(!_cam){
       qrCode =  lv_qrcode_create(this->_scr, 230, lv_color_hex3(0x000000), lv_color_hex3(0xeef));
-    }else{
-      qrCode =  lv_qrcode_create(_cam, 230, lv_color_hex3(0x000000), lv_color_hex3(0xeef));
-    }
+    // }else{
+    //   qrCode =  lv_qrcode_create(_cam, 230, lv_color_hex3(0x000000), lv_color_hex3(0xeef));
+    // }
   }
   xSemaphoreTake(xLvglMutex, portMAX_DELAY);// Added with exception handling for deletion
   lv_qrcode_update(qrCode, code.c_str(), strlen(code.c_str()));

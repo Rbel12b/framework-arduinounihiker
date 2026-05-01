@@ -205,6 +205,32 @@ public:
     void canvasCircle(int x, int y, int r, uint32_t color, uint32_t bg_color, bool fill);
 
     /**
+     * @fn canvasArc
+     * @brief Draw an arc stroke
+     * @param x Center X
+     * @param y Center Y
+     * @param r Radius
+     * @param startAngle Start angle in degrees (0=3 o'clock, clockwise)
+     * @param endAngle End angle in degrees; if < startAngle the arc wraps through 0°
+     * @param color Arc color
+     */
+    void canvasArc(int x, int y, int r, uint16_t startAngle, uint16_t endAngle, uint32_t color);
+
+    /**
+     * @fn canvasSemiCircle
+     * @brief Draw a half-circle arc (180°)
+     * @param x Center X
+     * @param y Center Y
+     * @param r Radius
+     * @param startAngle Orientation: arc spans [startAngle, startAngle+180] degrees
+     * @param color Border / stroke color
+     * @param bg_color Fill color (used when fill=true)
+     * @param fill If true, fills the half-disk interior with bg_color
+     */
+    void canvasSemiCircle(int x, int y, int r, uint16_t startAngle,
+                          uint32_t color, uint32_t bg_color, bool fill);
+
+    /**
      * @fn canvasRectangle
      * @brief Draw a rectangle
      * @param x Display coordinate X

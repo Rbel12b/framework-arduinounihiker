@@ -970,6 +970,41 @@ void Canvas::canvasCircle(int x, int y, int r, uint32_t color, uint32_t bg_color
   xSemaphoreGive(xLvglMutex);
 }
 
+void Canvas::canvasArc(int x, int y, int r, uint16_t startAngle, uint16_t endAngle, uint32_t color)
+{
+  xSemaphoreTake(xLvglMutex, portMAX_DELAY);
+  lv_draw_arc_dsc_t arc_dsc;
+  lv_draw_arc_dsc_init(&arc_dsc);
+  arc_dsc.color = lv_color_hex(color);
+  arc_dsc.opa   = LV_OPA_COVER;
+  arc_dsc.width = this->_lineW;
+  lv_canvas_draw_arc(_canvas, x, y, r, startAngle, endAngle, &arc_dsc);
+  xSemaphoreGive(xLvglMutex);
+}
+
+void Canvas::canvasSemiCircle(int x, int y, int r, uint16_t startAngle,
+                               uint32_t color, uint32_t bg_color, bool fill)
+{
+  uint16_t endAngle = (startAngle + 180) % 360;
+  xSemaphoreTake(xLvglMutex, portMAX_DELAY);
+  lv_draw_arc_dsc_t arc_dsc;
+  lv_draw_arc_dsc_init(&arc_dsc);
+  arc_dsc.opa = LV_OPA_COVER;
+  if (fill) {
+    arc_dsc.color = lv_color_hex(bg_color);
+    arc_dsc.width = r - 1;
+    lv_canvas_draw_arc(_canvas, x, y, r - 1, startAngle, endAngle, &arc_dsc);
+    arc_dsc.color = lv_color_hex(color);
+    arc_dsc.width = this->_lineW;
+    lv_canvas_draw_arc(_canvas, x, y, r, startAngle, endAngle, &arc_dsc);
+  } else {
+    arc_dsc.color = lv_color_hex(color);
+    arc_dsc.width = this->_lineW;
+    lv_canvas_draw_arc(_canvas, x, y, r, startAngle, endAngle, &arc_dsc);
+  }
+  xSemaphoreGive(xLvglMutex);
+}
+
 void Canvas::canvasRectangle(int x, int y, int w, int h, uint32_t color, uint32_t bg_color, bool fill)
 {
   xSemaphoreTake(xLvglMutex, portMAX_DELAY);

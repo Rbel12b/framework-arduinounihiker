@@ -15,7 +15,7 @@ static TaskHandle_t codeAITaskHandle = NULL;   // QR code recognition handle
 static TaskHandle_t NoModeTaskHandle = NULL;   // No mode recognition handle
 SemaphoreHandle_t readDataMutex;
 
-bool isTaskRunning = true;
+volatile bool isTaskRunning = true;
 
 typedef struct{
   sCatData_t _catData;
@@ -167,6 +167,11 @@ void AIRecognition::switchAiMode(eAiType_t mode)
     while(isTaskRunning){
       vTaskDelay(100);
     }
+    // Give the event task time to finish any in-progress flash/mutex operation
+    // before force-deleting it. vTaskDelete on a task holding xSPIFlashMutex
+    // would orphan that mutex and block the next face task's initialisation.
+    xTaskNotifyGive(eventTaskHandle);
+    vTaskDelay(50);
     vTaskDelete(eventTaskHandle);
     vQueueDelete(xQueueEvent);
     xQueueEvent = NULL;
